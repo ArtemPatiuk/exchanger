@@ -46,12 +46,12 @@ export class AuthService {
 
 
 	async login(dto: LoginDto, agent: string): Promise<Tokens> {
-		const user: User = await this.userService.findOne(dto.email).catch((err) => {
+		const user: User = await this.userService.findOne(dto.email, true).catch((err) => {
 			this.logger.error(err);
 			return null;
 		});
 		if (!user || !compareSync(dto.password, user.password)) {
-			throw new UnauthorizedException('Не верный логин или пароль');
+			throw new UnauthorizedException('Не вірний логін чи пароль');
 		}
 		return this.generatedTokens(user, agent);
 	}
