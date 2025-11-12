@@ -10,11 +10,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') implements CanActivate {
 		super();
 	}
 
-	canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-		const _isPublic = isPublic(context, this.reflector);
+	canActivate(ctx: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+		const _isPublic = isPublic(ctx, this.reflector);
 		if (_isPublic) {
 			return true;
 		}
-		return super.canActivate(context)
+		return super.canActivate(ctx);
 	}
 }

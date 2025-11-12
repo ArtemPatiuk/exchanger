@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { JwtPayload } from '@auth/interfaces';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { genSaltSync, hashSync } from 'bcrypt';
-import { User } from 'generated/prisma/client';
+import { Role, User } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -20,7 +21,7 @@ export class UserService {
 			}
 		})
 	}
-	findOne(idOrEmail: string) {
+	async findOne(idOrEmail: string) {
 		return this.prismaService.user.findFirst({
 			where: {
 				OR: [{ id: idOrEmail }, { email: idOrEmail }]
@@ -28,11 +29,11 @@ export class UserService {
 		})
 	}
 
-	delete(id: string) {
-		return this.prismaService.user.delete({
-			where: { id },
-			select: { id: true }
-		})
+	async delete(id: string, user: JwtPayload) {
+		if (user.id !== id && !user.role.includes(Role.ADMIN)) {
+			throw new ForbiddenException();
+		}
+		return this.prismaService.user.delete({ where: { id }, select: { id: true } });
 	}
 
 

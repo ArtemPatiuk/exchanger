@@ -1,4 +1,5 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, Controller, Get, HttpStatus, Post, Req, Res, UnauthorizedException, UseInterceptors } from '@nestjs/common';
+import 'dotenv/config';
+import { BadRequestException, Body, ClassSerializerInterceptor, Controller, Get, HttpStatus, Post, Res, UnauthorizedException, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
 import { Tokens } from './interfaces';
@@ -35,15 +36,13 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res() res: Response, @UserAgent() agent: string) {
     const tokens = await this.authService.login(dto, agent);
     if (!tokens) {
-      throw new BadRequestException(`Не вдається авторизуватись з даними :${JSON.stringify(dto)}`);
+      throw new BadRequestException(`Не вдається увійти з таким даними ${JSON.stringify(dto)}`);
     }
-
-
-    this.setRefreshTokentoCookies(tokens, res)
+    this.setRefreshTokentoCookies(tokens, res);
   }
 
   @Get('refresh-tokens')
-  async refreshToken(@Cookie(REFRESH_TOKEN) refreshToken: string, @Res() res: Response, @UserAgent() agent: string) {
+  async refreshTokens(@Cookie(REFRESH_TOKEN) refreshToken: string, @Res() res: Response, @UserAgent() agent: string) {
     if (!refreshToken) {
       throw new UnauthorizedException();
     }
@@ -51,7 +50,7 @@ export class AuthController {
     if (!tokens) {
       throw new UnauthorizedException();
     }
-    this.setRefreshTokentoCookies(tokens, res)
+    this.setRefreshTokentoCookies(tokens, res);
   }
 
 
@@ -64,8 +63,8 @@ export class AuthController {
       sameSite: 'lax',
       expires: new Date(tokens.refreshToken.exp),
       secure: this.configService.get('NODE_ENV', 'development') === 'production',
-      path: '/'
-    })
-    res.status(HttpStatus.CREATED).json({ accessToken: tokens.accessToken })
+      path: '/',
+    });
+    res.status(HttpStatus.CREATED).json({ accessToken: tokens.accessToken });
   }
 }
