@@ -1,12 +1,14 @@
 import 'dotenv/config';
-import { BadRequestException, Body, ClassSerializerInterceptor, Controller, Get, HttpStatus, Post, Res, UnauthorizedException, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, Controller, Get, HttpStatus, Post, Res, UnauthorizedException, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
-import { Tokens } from './interfaces';
+import { JwtPayload, Tokens } from './interfaces';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { Cookie, Public, UserAgent } from '@common/decorators';
+import { Cookie, CurrentUser, Public, Roles, UserAgent } from '@common/decorators';
 import { UserResponse } from '@user/responses';
+import { RolesGuard } from './guards/role.guard';
+import { Role } from 'generated/prisma';
 
 
 const REFRESH_TOKEN = 'refreshtoken'
@@ -78,4 +80,5 @@ export class AuthController {
     });
     res.status(HttpStatus.CREATED).json({ accessToken: tokens.accessToken });
   }
+
 }
