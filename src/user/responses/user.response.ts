@@ -11,6 +11,9 @@ export class UserResponse implements User {
 	role: $Enums.Role[];
 
 	@Exclude()
+	provider: 'GOOGLE';
+
+	@Exclude()
 	createdAt: Date;
 	updatedAt: Date;
 

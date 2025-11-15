@@ -4,7 +4,7 @@ import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { genSaltSync, hashSync } from 'bcrypt';
 import { Cache } from 'cache-manager';
-import { Role, User } from 'generated/prisma';
+import { Provider, Role, User } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import 'dotenv/config';
 import { convertToSecondsUtil } from '@common/utils';
@@ -19,15 +19,14 @@ export class UserService {
 	) { }
 
 	save(user: Partial<User>) {
-		if (!user.email || !user.password) {
-			throw new Error('Email and password are required');
-		}
-		const hashedPassword = this.PasswordToHash(user.password);
+		console.log('Trying to save user:', user);
+		const hashedPassword = user?.password ? this.PasswordToHash(user.password) : null;
 		return this.prismaService.user.create({
 			data: {
 				email: user.email,
 				password: hashedPassword,
-				role: ['USER']
+				role: ['USER'],
+				provider: user.provider ?? Provider.GOOGLE
 			}
 		})
 	}
