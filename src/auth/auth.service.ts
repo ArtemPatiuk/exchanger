@@ -96,7 +96,6 @@ export class AuthService {
 
 	async googleAuth(email: string, agent: string) {
 		const userExist = await this.userService.findOne(email);
-		console.log('user exist = ', userExist)
 		if (userExist) {
 			return this.generatedTokens(userExist, agent)
 		}
@@ -104,7 +103,6 @@ export class AuthService {
 			this.logger.error(err);
 			return null;
 		});
-		console.log('Created user = ', user)
 		if (!user) {
 			throw new HttpException(`Не вдалось створити користувача з email:${email} - Google Auth`, HttpStatus.BAD_REQUEST);
 		}

@@ -19,14 +19,13 @@ export class UserService {
 	) { }
 
 	save(user: Partial<User>) {
-		console.log('Trying to save user:', user);
 		const hashedPassword = user?.password ? this.PasswordToHash(user.password) : null;
 		return this.prismaService.user.create({
 			data: {
 				email: user.email,
 				password: hashedPassword,
 				role: ['USER'],
-				provider: user.provider ?? Provider.GOOGLE
+				provider: user.provider ?? null
 			}
 		})
 	}
