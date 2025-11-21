@@ -19,7 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "docker:up": "docker compose -f ./docker/postgres/docker-compose.yml up -d",
-    "docker:down": "docker compose -f ./docker/postgres/docker-compose.yml down"
+    "docker:down": "docker compose -f ./docker/postgres/docker-compose.yml down",
+    "generate:types": "prisma generate --schema ../shared/prisma-types/schema.prisma"
   },
   "dependencies": {
     "@binance/connector": "^3.6.1",

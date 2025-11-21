@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Spot, SPOT_REST_API_PROD_URL } from '@binance/connector';
+import { Spot } from '@binance/connector';
 
 @Injectable()
 export class BinanceService {
@@ -10,16 +10,12 @@ export class BinanceService {
 	private readonly CACHE_DURATION = 60 * 60 * 1000; // 1 час
 
 	constructor() {
-		console.log('BINANCE_API_KEY:', process.env.BINANCE_API_KEY);
-		console.log('BINANCE_API_SECRET:', process.env.BINANCE_API_SECRET);
-
 		this.client = new Spot(
 			process.env.BINANCE_API_KEY ?? '',
 			process.env.BINANCE_API_SECRET ?? '',
 			{ adjustTime: true }
 		);
 
-		console.log('Binance Spot client initialized:', !!this.client);
 	}
 
 
@@ -28,7 +24,7 @@ export class BinanceService {
 			const response = await this.client.signRequest('GET', '/api/v3/account');
 			return response.data;
 		} catch (error) {
-			throw new Error('Не удалось получить данные аккаунта Binance');
+			throw new Error('Не вдалось отримати дані про аккаунт Binance');
 		}
 	}
 
@@ -45,7 +41,7 @@ export class BinanceService {
 			return this.coinConfigCache;
 		} catch (error) {
 			console.error('Error fetching coin config:', error.response?.data || error);
-			throw new InternalServerErrorException('Не удалось получить конфиг монет с Binance');
+			throw new InternalServerErrorException('Не вдалось отримати інформацію про монети з Binance');
 		}
 	}
 
@@ -79,7 +75,7 @@ export class BinanceService {
 			};
 		} catch (error) {
 			console.error('Error fetching deposit address:', error.response?.data || error);
-			throw new InternalServerErrorException('Не удалось получить адрес депозита с Binance');
+			throw new InternalServerErrorException('Не вдалось отримати адресу для депозита з Binance');
 		}
 	}
 
@@ -89,7 +85,7 @@ export class BinanceService {
 			return response.data;
 		} catch (error) {
 			console.error('Error sending crypto:', error.response?.data || error);
-			throw new InternalServerErrorException('Не удалось отправить криптовалюту');
+			throw new InternalServerErrorException('Не вдалось відправити криптовалюту');
 		}
 	}
 }

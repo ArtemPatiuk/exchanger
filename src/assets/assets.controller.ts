@@ -21,11 +21,15 @@ export class AssetsController {
   getAll() {
     return this.assetsService.getAllAssets();
   }
-
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
   @Get('deposit-address')
   async getDepositAddress(@Query('coin') coin: string, @Query('network') network?: string) {
     return this.assetsService.getDepositAddress(coin, network);
   }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
   @Get('account')
   async getBinanceAccount() {
     return this.assetsService.getAccountIno();
