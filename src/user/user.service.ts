@@ -4,7 +4,7 @@ import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { genSaltSync, hashSync } from 'bcrypt';
 import { Cache } from 'cache-manager';
-import { Provider, Role, User } from 'generated/prisma';
+import { Role, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import 'dotenv/config';
 import { convertToSecondsUtil } from '@common/utils';

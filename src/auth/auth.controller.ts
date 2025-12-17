@@ -8,11 +8,14 @@ import { ConfigService } from '@nestjs/config';
 import { Cookie, CurrentUser, Public, Roles, UserAgent } from '@common/decorators';
 import { UserResponse } from '@user/responses';
 import { RolesGuard } from './guards/role.guard';
-import { Role } from 'generated/prisma';
+import { Role } from '@prisma/client';
 import { GoogleGuard } from './guards/google.guard';
 import { HttpService } from '@nestjs/axios';
 import { map, mergeMap, tap } from 'rxjs';
 import { handleTimeoutAndErrors } from '@common/helpers';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { UserService } from '@user/user.service';
 
 
 const REFRESH_TOKEN = 'refreshtoken'
@@ -24,6 +27,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly userService: UserService
 
   ) { }
 
@@ -41,10 +45,19 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() dto: LoginDto, @Res() res: Response, @UserAgent() agent: string) {
+    console.log('➡️ [CONTROLLER] login DTO:', dto);
     const tokens = await this.authService.login(dto, agent);
     if (!tokens) {
       throw new BadRequestException(`Не вдається увійти з таким даними ${JSON.stringify(dto)}`);
     }
+    console.log('⬅️ [CONTROLLER] tokens FROM service:', {
+      accessToken: tokens.accessToken,
+      refreshToken: {
+        token: tokens.refreshToken.token,
+        exp: tokens.refreshToken.exp,
+      },
+      user: tokens.user,
+    });
     this.setRefreshTokentoCookies(tokens, res);
   }
 
@@ -59,6 +72,8 @@ export class AuthController {
     res.sendStatus(HttpStatus.OK);
   }
 
+
+
   @Get('refresh-tokens')
   async refreshTokens(@Cookie(REFRESH_TOKEN) refreshToken: string, @Res() res: Response, @UserAgent() agent: string) {
     if (!refreshToken) {
@@ -71,19 +86,41 @@ export class AuthController {
     this.setRefreshTokentoCookies(tokens, res);
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Get('current')
+  async getCurrentUser(@Req() req) {
+    console.log('🖥 Server current user request received');
+    console.log('🖥 req.user:', req.user);
+
+    const user = await this.userService.findOne(req.user.id);
+    if (!user) throw new UnauthorizedException();
+    console.log('🖥 User current', user);
+    return user;
+  }
+
+
 
   private setRefreshTokentoCookies(tokens: Tokens, res: Response) {
     if (!tokens) {
       throw new UnauthorizedException();
     }
+    console.log('🚀 [RESPONSE] sending to client:', {
+      jsonBody: {
+        accessToken: tokens.accessToken,
+      },
+      cookie: {
+        refreshToken: tokens.refreshToken.token,
+        exp: tokens.refreshToken.exp,
+      },
+    });
     res.cookie(REFRESH_TOKEN, tokens.refreshToken.token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'lax',//none
       expires: new Date(tokens.refreshToken.exp),
-      secure: this.configService.get('NODE_ENV', 'development') === 'production',
+      secure: false,//this.configService.get('NODE_ENV', 'development') === 'production' | true
       path: '/',
     });
-    res.status(HttpStatus.CREATED).json({ accessToken: tokens.accessToken });
+    res.status(HttpStatus.CREATED).json({ accessToken: tokens.accessToken, user: tokens.user });
   }
 
   @UseGuards(GoogleGuard)

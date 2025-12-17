@@ -3,7 +3,7 @@ import { LoginDto, RegisterDto } from './dto';
 import { UserService } from '@user/user.service';
 import { Tokens } from './interfaces';
 import { compareSync } from 'bcrypt';
-import { Provider, Token, User } from 'generated/prisma';
+import { Provider, Token, User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@prisma/prisma.service';
 import { v4 } from 'uuid';
@@ -50,6 +50,11 @@ export class AuthService {
 			this.logger.error(err);
 			return null;
 		});
+		console.log('🧪 PASSWORD FROM DB:', {
+			password: user.password,
+			type: typeof user.password,
+			length: user.password?.length,
+		});
 		if (!user || !compareSync(dto.password, user.password)) {
 			throw new UnauthorizedException('Не вірний логін чи пароль');
 		}
@@ -65,7 +70,21 @@ export class AuthService {
 				role: user.role,
 			});
 		const refreshToken = await this.getRefreshToken(user.id, agent);
-		return { accessToken, refreshToken };
+		const userResponse = {
+			id: user.id,
+			email: user.email,
+			role: user.role as ("USER" | "ADMIN")[],
+		};
+		const tokens = { accessToken, refreshToken, user: userResponse };
+		console.log('🧩 [SERVICE] generatedTokens RETURN:', {
+			accessToken: tokens.accessToken,
+			refreshToken: {
+				token: tokens.refreshToken.token,
+				exp: tokens.refreshToken.exp,
+			},
+			user: tokens.user,
+		});
+		return tokens;
 	}
 
 	private async getRefreshToken(userId: string, agent: string): Promise<Token> {

@@ -5,7 +5,8 @@ import { UserResponse } from './responses';
 import { CurrentUser, Roles } from '@common/decorators';
 import { JwtPayload } from '@auth/interfaces';
 import { RolesGuard } from '@auth/guards/role.guard';
-import { Role } from 'generated/prisma';
+import { Role } from '@prisma/client';
+
 
 @Controller('user')
 export class UserController {

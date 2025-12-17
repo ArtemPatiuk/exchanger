@@ -5,7 +5,7 @@ import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '@auth/interfaces';
 import { UserService } from '@user/user.service';
-import { User } from 'generated/prisma';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -19,6 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	}
 
 	async validate(payload: JwtPayload) {
+		console.log("JWT PAYLOAD:", payload);
 		const user: User = await this.userService.findOne(payload.id).catch((err) => {
 			this.logger.error(err);
 			return null;

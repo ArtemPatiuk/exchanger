@@ -2,9 +2,10 @@ import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/comm
 import { AssetsService } from './assets.service';
 import { CreateAssetDto } from './dto';
 import { RolesGuard } from '@auth/guards/role.guard';
-import { Roles } from '@common/decorators';
-import { Role } from 'generated/prisma';
+import { Public, Roles } from '@common/decorators';
+import { Role } from '@prisma/client';
 
+@Public()
 @Controller('assets')
 export class AssetsController {
   constructor(private readonly assetsService: AssetsService) { }

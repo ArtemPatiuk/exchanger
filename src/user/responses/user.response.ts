@@ -1,22 +1,19 @@
 import { Exclude } from 'class-transformer';
-import { $Enums, User } from 'generated/prisma';
+import { $Enums, User } from '@prisma/client';
 
-export class UserResponse implements User {
+export class UserResponse{
 	id: string;
 	email: string;
+	role: $Enums.Role[];
+	updatedAt: Date;
 
 	@Exclude()
 	password: string;
-
-	role: $Enums.Role[];
-
 	@Exclude()
 	provider: 'GOOGLE';
-
 	@Exclude()
 	createdAt: Date;
-	updatedAt: Date;
-
+	
 	constructor(user: User) {
 		Object.assign(this, user)
 	}
